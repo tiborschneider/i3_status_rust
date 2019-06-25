@@ -1,0 +1,13 @@
+[package]
+name = "status-parallel"
+version = "0.1.0"
+authors = ["Tibor Schneider <tiborschneider@bluewin.ch>"]
+edition = "2018"
+
+[dependencies]
+chrono = "0.4.6"
+systemstat = "0.1.4"
+battery = "0.7.4"
+network-manager = "0.11.0"
+json = "0.11"
+alsa = "0.2"
