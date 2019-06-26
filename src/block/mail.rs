@@ -1,9 +1,10 @@
 use super::element::{Element, ElementFormat};
+use crate::event::Event;
 
 use std::sync::{Arc, Mutex};
-use std::sync::mpsc::Sender;
-use std::thread;
+use std::sync::mpsc::{Sender, Receiver};
 use std::time::Duration;
+// use std::process::Command;
 
 use std::fs::read_dir;
 use std::path::Path;
@@ -12,8 +13,9 @@ const ICON: char = '\u{f6ee}';
 const BLUEWIN_DIR: &str = "/home/tibor/Mail/bluewin/INBOX/new";
 const ETH_DIR: &str = "/home/tibor/Mail/ETH/INBOX/new";
 
+// const MAIL_EMACS_CMD: &str = "\'(mu4e-headers-search-bookmark \"flag:unread and not flag:trashed\")\'";
 
-pub fn mail_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>) {
+pub fn mail_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>, event: Receiver<Event>) {
     let bluewin_dir = Path::new(BLUEWIN_DIR);
     let eth_dir = Path::new(ETH_DIR);
     loop {
@@ -44,6 +46,12 @@ pub fn mail_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>) {
         }
 
         // sleep for one second
-        thread::sleep(Duration::new(0, 500_000_000));
+        match event.recv_timeout(Duration::new(0, 100_000_000)) {
+            Ok(_) => {
+                // launch emacs client for mail and read unread
+                //Command::new("emacsclient").arg("-ce").arg(MAIL_EMACS_CMD).spawn().unwrap();
+            },
+            Err(_) => { }
+        }
     }
 }

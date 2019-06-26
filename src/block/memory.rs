@@ -16,7 +16,7 @@ pub fn memory_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>) {
     loop {
         let mem = sys.memory().unwrap();
         let perc = 100.0 - ((mem.free.as_usize() as f64) * 100.0) / (mem.total.as_usize() as f64);
-        let new_text = String::from(format!("{} {:.1}%", ICON, perc));
+        let new_text = String::from(format!("{} {:.0}%", ICON, perc));
         
         // get mutex
         let mut updated = false;

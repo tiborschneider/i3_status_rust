@@ -3,12 +3,12 @@ use crate::event::Event;
 
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc::{Sender, Receiver};
-use std::thread;
 use std::time::Duration;
 
 use systemstat::{System, Platform};
 
 
+const DELAY: u64 = 2;
 const ICON: char = '\u{f85a}';
 const TEMP_ICON: char = '\u{fa03}';
 
@@ -20,15 +20,18 @@ pub fn cpu_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>, event: Receiver<Even
         // start measurement
         let cpu = sys.cpu_load_aggregate().unwrap();
 
-        // wait one second
-        thread::sleep(Duration::new(1, 0));
+        // check if new messages have arrived
+        extended = match event.recv_timeout(Duration::new(DELAY, 0)) {
+            Ok(_) => !extended,
+            Err(_) => extended
+        };
 
         // evaluate measurement
         let cpu = cpu.done().unwrap();
 
         // get percentage
         let perc = (1.0 - cpu.idle) * 100.0;
-        let mut new_text = String::from(format!("{} {:.1}%", ICON, perc));
+        let mut new_text = String::from(format!("{} {:.0}%", ICON, perc));
 
         // append temperature if necessary
         if extended {
@@ -59,10 +62,5 @@ pub fn cpu_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>, event: Receiver<Even
             }
         }
 
-        // check if new messages have arrived
-        extended = match event.try_recv() {
-            Ok(_) => !extended,
-            Err(_) => extended
-        }
     }
 }

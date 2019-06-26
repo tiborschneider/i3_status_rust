@@ -28,14 +28,29 @@ pub fn battery_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>) {
         let mut updated = false;
 
         // update battery
-        manager.refresh(&mut battery).unwrap();
+        match manager.refresh(&mut battery) {
+            Ok(_) => {},
+            Err(_) => {eprintln!("Battery: cannot refresh manager");}
+        }
 
         // get battery state
         let state = battery.state();
         let perc: f32 = battery.state_of_charge().get::<percent>();
         let time: battery::units::Time = match state {
-            battery::State::Charging => battery.time_to_full().unwrap(),
-            battery::State::Discharging => battery.time_to_empty().unwrap(),
+            battery::State::Charging => match battery.time_to_full() {
+                Some(t) => t,
+                None => {
+                    eprintln!("Battery: cannot get time to full!");
+                    battery::units::Time::new::<minute>(0.0)
+                }
+            },
+            battery::State::Discharging => match battery.time_to_empty() {
+                Some(t) => t,
+                None => {
+                    eprintln!("Battery: cannot get time to empty!");
+                    battery::units::Time::new::<minute>(0.0)
+                }
+            },
             _ => battery::units::Time::new::<minute>(0.0)
         };
         
