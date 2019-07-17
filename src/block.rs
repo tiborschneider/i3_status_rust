@@ -9,6 +9,7 @@ pub mod mail;
 pub mod memory;
 pub mod cpu;
 pub mod traffic;
+pub mod weather;
 
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc::Sender;

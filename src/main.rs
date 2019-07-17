@@ -19,6 +19,7 @@ use block::audio::audio_loop;
 use block::mail::mail_loop;
 use block::memory::memory_loop;
 use block::cpu::cpu_loop;
+use block::weather::weather_loop;
 
 fn main() {
     // setup bar
@@ -34,6 +35,15 @@ fn main() {
     bar.add(traffic_elem.clone());
     thread::Builder::new().name(String::from("traffic"))
         .spawn(move || traffic_loop(traffic_elem.clone(), traffic_tx)).unwrap();
+
+    // setup weather block
+    let weather_elem = Arc::new(Mutex::new(Element::new("weather", "weather", String::new(), ElementFormat::Normal)));
+    let weather_tx = tx.clone();
+    let (weather_event_tx, weather_event_rx) = channel::<Event>();
+    event_system.add("weather", weather_event_tx);
+    bar.add(weather_elem.clone());
+    thread::Builder::new().name(String::from("weather"))
+        .spawn(move || weather_loop(weather_elem.clone(), weather_tx, weather_event_rx)).unwrap();
 
     // setup cpu block
     let cpu_elem = Arc::new(Mutex::new(Element::new("cpu", "cpu", String::new(), ElementFormat::Normal)));

@@ -1,4 +1,4 @@
-use super::element::Element;
+use super::element::{Element, ElementFormat};
 
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc::Sender;
@@ -35,7 +35,7 @@ pub fn battery_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>) {
 
         // get battery state
         let state = battery.state();
-        let perc: f32 = battery.state_of_charge().get::<percent>();
+        let mut perc: f32 = battery.state_of_charge().get::<percent>();
         let time: battery::units::Time = match state {
             battery::State::Charging => match battery.time_to_full() {
                 Some(t) => t,
@@ -51,6 +51,10 @@ pub fn battery_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>) {
                     battery::units::Time::new::<minute>(0.0)
                 }
             },
+            battery::State::Full => {
+                perc = 100.0;
+                battery::units::Time::new::<minute>(0.0)
+            }
             _ => battery::units::Time::new::<minute>(0.0)
         };
         
@@ -63,17 +67,16 @@ pub fn battery_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>) {
         new_text.push(' ');
         new_text.push_str(&String::from(format!("{:.0}", perc)));
         new_text.push('%');
-        match state {
-            battery::State::Full => {},
-            _ => {
-                let mut time_val: f32 = time.get::<minute>();
-                let mut unit = 'm';
-                if time_val > 60.0 {
-                    time_val = time.get::<hour>();
-                    unit = 'h';
-                }
-                new_text.push_str(&format!(" ({:.1}{})", time_val, unit));
+
+        // print time left
+        let mut time_val: f32 = time.get::<minute>();
+        if time_val != 0.0 {
+            let mut unit = 'm';
+            if time_val > 60.0 {
+                time_val = time.get::<hour>();
+                unit = 'h';
             }
+            new_text.push_str(&format!(" ({:.1}{})", time_val, unit));
         }
 
         // get mutex
@@ -81,6 +84,13 @@ pub fn battery_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>) {
             // check if text has changed
             if e.text != new_text {
                 e.set_text(new_text);
+                if perc < 10.0 && state == battery::State::Discharging {
+                    e.set_format(ElementFormat::Error);
+                } else if perc < 20.0 && state == battery::State::Discharging {
+                    e.set_format(ElementFormat::Warning);
+                } else {
+                    e.set_format(ElementFormat::Normal)
+                }
                 updated = true;
             }
         }

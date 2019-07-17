@@ -5,8 +5,8 @@ use std::sync::mpsc::{Receiver};
 use std::thread;
 use std::time::Duration;
 
-const MAX_REFRESH_S: u64 = 0;
-const MAX_REFRESH_NS: u32 = 100_000_000;
+const MAX_REFRESH_S: u64 = 1;
+const MAX_REFRESH_NS: u32 = 0;//500_000_000;
 
 pub struct Bar<'a> {
     blocks: Vec<Arc<Mutex<Element<'a>>>>,

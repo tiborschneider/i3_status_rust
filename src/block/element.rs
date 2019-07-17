@@ -61,7 +61,7 @@ impl<'a> Element<'a> {
         Element { name: None,
                   instance: None,
                   text: String::from(" "),
-                  format: ElementFormat::Error,
+                  format: ElementFormat::Normal,
                   use_pango: false }
     }
 
@@ -83,14 +83,15 @@ impl<'a> Element<'a> {
         }
         print!("\"full_text\": \"{}\"", self.text);
         match self.format {
-            ElementFormat::Normal    => print!(", \"color\": \"{}\", \"background\": \"{}\"", FG_COLOR, BG_COLOR),
+            ElementFormat::Normal    => print!(", \"background\": \"{}\"", BG_COLOR),
             ElementFormat::Info      => print!(", \"color\": \"{}\", \"background\": \"{}\"", INFO_FG_COLOR, BG_COLOR),
             ElementFormat::Warning   => print!(", \"color\": \"{}\", \"background\": \"{}\"", WARNING_FG_COLOR, BG_COLOR),
             ElementFormat::Error     => print!(", \"color\": \"{}\", \"background\": \"{}\"", ERROR_FG_COLOR, BG_COLOR),
-            ElementFormat::Separator => print!(", \"color\": \"{}\", \"background\": \"{}\"", SEP_COLOR, SEP_COLOR),
+            //ElementFormat::Separator => print!(", \"color\": \"{}\", \"background\": \"{}\"", SEP_COLOR, SEP_COLOR),
+            ElementFormat::Separator => {},
             ElementFormat::Time      => print!(", \"color\": \"{}\", \"background\": \"{}\"", BLACK_COLOR, BLUE_COLOR),
         }
-        print!(", \"separator\": false");
+        //print!(", \"separator\": false");
         print!(", \"separator_block_width\": 0");
         if self.use_pango {
             print!(", \"markup\": \"pango\"");
