@@ -40,14 +40,12 @@ pub fn battery_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>) {
             battery::State::Charging => match battery.time_to_full() {
                 Some(t) => t,
                 None => {
-                    eprintln!("Battery: cannot get time to full!");
                     battery::units::Time::new::<minute>(0.0)
                 }
             },
             battery::State::Discharging => match battery.time_to_empty() {
                 Some(t) => t,
                 None => {
-                    eprintln!("Battery: cannot get time to empty!");
                     battery::units::Time::new::<minute>(0.0)
                 }
             },
@@ -104,6 +102,6 @@ pub fn battery_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>) {
         }
 
         // sleep for one second
-        thread::sleep(Duration::new(5, 0));
+        thread::sleep(Duration::new(1, 0));
     }
 }

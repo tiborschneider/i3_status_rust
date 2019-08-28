@@ -5,7 +5,7 @@ use std::sync::mpsc::Sender;
 use std::thread;
 use std::time::Duration;
 
-use network_manager::NetworkManager;
+use network_manager::{Connection, NetworkManager};
 
 pub fn network_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>) {
     let manager = NetworkManager::new();
@@ -13,7 +13,10 @@ pub fn network_loop(elem: Arc<Mutex<Element>>, tx: Sender<i32>) {
         let mut updated = false;
 
         // get ssid
-        let connections = manager.get_active_connections().unwrap();
+        let connections: Vec<Connection> = match manager.get_active_connections() {
+            Ok(c) => c,
+            Err(_) => Vec::new(),
+        };
         let mut new_text: String = String::new();
         if connections.is_empty() {
             new_text.push_str("offline");
